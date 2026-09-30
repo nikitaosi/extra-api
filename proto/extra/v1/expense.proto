@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package extra.v1;
+
+import "google/protobuf/timestamp.proto";
+
+enum Currency {
+  CURRENCY_UNSPECIFIED = 0;
+  CURRENCY_GEL = 1;
+  CURRENCY_USD = 2;
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+}
+
+message Expense {
+  string id = 1;
+  int64 amount_minor = 2;
+  Currency currency = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  string description = 5;
+  Category category = 6;
+}
+
+message ExpenseInput {
+  int64 amount_minor = 1;
+  Currency currency = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+  string description = 4;
+  string category_id = 5;
+}
+
+message ListCategoriesRequest {}
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message ListExpensesRequest {
+  uint32 page = 1;
+  uint32 page_size = 2;
+  string category_id = 3;
+  string query = 4;
+}
+message ListExpensesResponse {
+  repeated Expense expenses = 1;
+  uint32 total = 2;
+}
+
+message GetExpenseRequest {
+  string id = 1;
+}
+message GetExpenseResponse {
+  Expense expense = 1;
+}
+message CreateExpenseRequest {
+  ExpenseInput input = 1;
+}
+message CreateExpenseResponse {
+  Expense expense = 1;
+}
+message UpdateExpenseRequest {
+  string id = 1;
+  ExpenseInput input = 2;
+}
+message UpdateExpenseResponse {
+  Expense expense = 1;
+}
+message DeleteExpenseRequest {
+  string id = 1;
+}
+message DeleteExpenseResponse {}
+
+service ExpenseService {
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc ListExpenses(ListExpensesRequest) returns (ListExpensesResponse);
+  rpc GetExpense(GetExpenseRequest) returns (GetExpenseResponse);
+  rpc CreateExpense(CreateExpenseRequest) returns (CreateExpenseResponse);
+  rpc UpdateExpense(UpdateExpenseRequest) returns (UpdateExpenseResponse);
+  rpc DeleteExpense(DeleteExpenseRequest) returns (DeleteExpenseResponse);
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+message LoginResponse {
+  string email = 1;
+}
+message LogoutRequest {}
+message LogoutResponse {}
+message MeRequest {}
+message MeResponse {
+  string email = 1;
+}
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc Me(MeRequest) returns (MeResponse);
+}
