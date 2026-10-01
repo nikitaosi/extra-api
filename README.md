@@ -14,14 +14,14 @@ pnpm user:create email@example.com
 pnpm dev
 ```
 
-`user:create` prompts for the password without echoing it. The frontend runs at `http://localhost:3000` and the API at `http://localhost:1337` by default.
+`user:create` prompts for the password without echoing it. The frontend runs at `http://localhost:3000` and the API at `http://localhost:3101` by default.
 
 ## API
 
 ConnectRPC supports binary Protobuf and JSON. The canonical contract is the `.proto` file. For a manual JSON request that demonstrates the protected endpoint (it returns HTTP 401 until login):
 
 ```sh
-curl -i -H 'Content-Type: application/json' -d '{}' http://localhost:1337/extra.v1.ExpenseService/ListCategories
+curl -i -H 'Content-Type: application/json' -d '{}' http://localhost:3101/extra.v1.ExpenseService/ListCategories
 ```
 
 All expense methods require a session established with `AuthService/Login`. Session tokens are stored only in an HttpOnly cookie; their hashes are stored in PostgreSQL. The login endpoint is rate limited. The API never exposes a shared bearer token to the browser.
