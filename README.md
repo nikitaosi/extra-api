@@ -32,6 +32,8 @@ curl -i -H 'Content-Type: application/json' -d '{}' http://localhost:3101/extra.
 
 All expense methods require a session established with `AuthService/Login`. Session tokens are stored only in an HttpOnly cookie; their hashes are stored in PostgreSQL. The login endpoint is rate limited. The API never exposes a shared bearer token to the browser.
 
+Expense amounts use integer minor units. New records support THB and USD; the earlier GEL enum and database values remain accepted so existing records can still be read and updated. Currency support is defined in the Protobuf contract and enforced by the API and database migration together.
+
 ## Checks
 
 ```sh

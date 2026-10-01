@@ -13,7 +13,7 @@ import { isUuid, validateExpenseInput } from './validation.js';
 type ExpenseRow = {
   id: string;
   amount_minor: string;
-  currency: 'GEL' | 'USD';
+  currency: 'GEL' | 'USD' | 'THB';
   occurred_at: Date;
   description: string;
   category_id: string;
@@ -27,7 +27,7 @@ function expenseFromRow(row: ExpenseRow) {
   return {
     id: row.id,
     amountMinor: BigInt(row.amount_minor),
-    currency: row.currency === 'GEL' ? Currency.GEL : Currency.USD,
+    currency: row.currency === 'GEL' ? Currency.GEL : row.currency === 'USD' ? Currency.USD : Currency.THB,
     occurredAt: timestampFromDate(new Date(row.occurred_at)),
     description: row.description,
     category: { id: row.category_id, name: row.category_name },

@@ -8,6 +8,7 @@ enum Currency {
   CURRENCY_UNSPECIFIED = 0;
   CURRENCY_GEL = 1;
   CURRENCY_USD = 2;
+  CURRENCY_THB = 3;
 }
 
 message Category {

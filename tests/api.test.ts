@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { PGlite } from '@electric-sql/pglite';
 import argon2 from 'argon2';
 import type { Pool } from 'pg';
@@ -12,8 +11,9 @@ const categoryId = 'cbcd0ac9-8d90-4ac9-a811-f868110f2fb1';
 
 test('authenticated expense CRUD, validation, and owner isolation', async () => {
   const database = new PGlite();
-  const migration = await readFile(fileURLToPath(new URL('../migrations/0001_init.sql', import.meta.url)), 'utf8');
-  await database.exec(migration);
+  const migrations = new URL('../migrations/', import.meta.url);
+  const migrationFiles = (await readdir(migrations)).filter((name) => name.endsWith('.sql')).sort();
+  for (const name of migrationFiles) await database.exec(await readFile(new URL(name, migrations), 'utf8'));
   const firstUserId = randomUUID();
   const secondUserId = randomUUID();
   const hash = await argon2.hash('correct horse battery staple');
@@ -58,12 +58,13 @@ test('authenticated expense CRUD, validation, and owner isolation', async () => 
     assert.equal(invalid.statusCode, 400);
 
     const create = await call('ExpenseService/CreateExpense', { input: {
-      amountMinor: '1234', currency: 'CURRENCY_GEL', occurredAt: '2026-01-01T12:00:00Z',
+      amountMinor: '1234', currency: 'CURRENCY_THB', occurredAt: '2026-01-01T12:00:00Z',
       description: 'Lunch', categoryId,
     } }, cookie);
     assert.equal(create.statusCode, 200, create.body);
     const id = create.json().expense.id as string;
     assert.equal(create.json().expense.amountMinor, '1234');
+    assert.equal(create.json().expense.currency, 'CURRENCY_THB');
 
     const list = await call('ExpenseService/ListExpenses', { query: 'lun' }, cookie);
     assert.equal(list.statusCode, 200, list.body);

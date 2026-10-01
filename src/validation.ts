@@ -9,7 +9,7 @@ export function validateExpenseInput(input: ExpenseInput | undefined) {
   if (input.amountMinor <= 0n || input.amountMinor > maxAmountMinor) {
     throw new ConnectError('Amount must be positive and at most 999,999,999.99', Code.InvalidArgument);
   }
-  if (input.currency !== Currency.GEL && input.currency !== Currency.USD) {
+  if (input.currency !== Currency.GEL && input.currency !== Currency.USD && input.currency !== Currency.THB) {
     throw new ConnectError('Unsupported currency', Code.InvalidArgument);
   }
   if (!input.occurredAt) throw new ConnectError('Date is required', Code.InvalidArgument);
@@ -21,7 +21,8 @@ export function validateExpenseInput(input: ExpenseInput | undefined) {
   const description = input.description.trim();
   if (description.length > 500) throw new ConnectError('Description is too long', Code.InvalidArgument);
   if (!isUuid(input.categoryId)) throw new ConnectError('Invalid category', Code.InvalidArgument);
-  return { amountMinor: input.amountMinor, currency: input.currency === Currency.GEL ? 'GEL' : 'USD', occurredAt, description, categoryId: input.categoryId };
+  const currency = input.currency === Currency.GEL ? 'GEL' : input.currency === Currency.USD ? 'USD' : 'THB';
+  return { amountMinor: input.amountMinor, currency, occurredAt, description, categoryId: input.categoryId };
 }
 
 export function isUuid(value: string): boolean {
