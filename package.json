@@ -9,6 +9,7 @@
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/main.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/src/main.js",
+    "start:hosted": "node --import tsx scripts/migrate.ts && node dist/src/main.js",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "proto:generate": "buf generate",

@@ -9,4 +9,4 @@ const port = Number(process.env.PORT ?? 3101);
 if (!Number.isInteger(port) || port <= 0) throw new Error('Invalid PORT');
 const pool = makePool(databaseUrl);
 const server = await buildServer(pool, frontendOrigin, process.env.NODE_ENV === 'production');
-await server.listen({ host: process.env.HOST ?? '127.0.0.1', port });
+await server.listen({ host: process.env.HOST ?? (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1'), port });

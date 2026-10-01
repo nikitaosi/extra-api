@@ -42,3 +42,7 @@ pnpm test
 
 The tests run the actual migration in an isolated in-memory PostgreSQL instance (PGlite), so they do not need Docker or a production database.
 GitHub Actions also runs these checks, verifies that generated Protobuf code is committed, and applies migrations to a fresh PostgreSQL 17 service.
+
+## Hosting
+
+`render.yaml` defines a free Render web service. Set `DATABASE_URL` to the Neon PostgreSQL connection string and `FRONTEND_ORIGIN` to the exact HTTPS Netlify site origin in Render's environment settings. These values must not be committed. The hosted start command applies pending migrations before accepting requests; `/health` checks the database connection. Create the first user from a trusted local machine with `DATABASE_URL` pointing to Neon and `pnpm user:create email@example.com`.
