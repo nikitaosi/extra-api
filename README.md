@@ -4,9 +4,15 @@ The Fastify and ConnectRPC backend for Extra. PostgreSQL stores expenses, catego
 
 ## Local setup
 
-Requires Node.js 24 and PostgreSQL 16 or newer. If Docker is available, `docker compose up -d db` starts a local PostgreSQL 17 instance. Copy `.env.example` to `.env`, then run:
+Requires Node.js 24 and PostgreSQL 16 or newer. Choose one local database setup:
+
+- Docker: `docker compose up -d db` starts PostgreSQL 17. The database URL in `.env.example` works with this setup.
+- [Postgres.app](https://postgresapp.com/): initialize and start a PostgreSQL 17 cluster, then create a project database with `/Applications/Postgres.app/Contents/Versions/17/bin/createdb extra`. In `.env`, set `DATABASE_URL=postgres://YOUR_MAC_USERNAME@127.0.0.1:5432/extra` after copying the example below. Postgres.app does not require changing the system `PATH` when using the full CLI path.
+
+Then run:
 
 ```sh
+cp .env.example .env
 pnpm install
 pnpm proto:generate
 pnpm db:migrate
@@ -35,3 +41,4 @@ pnpm test
 ```
 
 The tests run the actual migration in an isolated in-memory PostgreSQL instance (PGlite), so they do not need Docker or a production database.
+GitHub Actions also runs these checks, verifies that generated Protobuf code is committed, and applies migrations to a fresh PostgreSQL 17 service.

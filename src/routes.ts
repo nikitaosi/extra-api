@@ -88,8 +88,9 @@ export function createRoutes(db: Database, secureCookies: boolean) {
           throw new ConnectError('Invalid category', Code.InvalidArgument);
         }
         const filters = `e.user_id = $1 AND ($2::uuid IS NULL OR e.category_id = $2::uuid)
-          AND ($3::text = '' OR e.description ILIKE '%' || $3 || '%')`;
-        const params = [user.id, request.categoryId || null, request.query.trim()];
+          AND ($3::text = '' OR e.description ILIKE $3 ESCAPE '!')`;
+        const query = request.query.trim().replace(/[!%_]/g, '!$&');
+        const params = [user.id, request.categoryId || null, query ? `%${query}%` : ''];
         const [rows, count] = await Promise.all([
           db.query<ExpenseRow>(
             `SELECT ${expenseColumns} FROM expenses e JOIN categories c ON c.id = e.category_id

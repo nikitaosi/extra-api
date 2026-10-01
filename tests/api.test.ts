@@ -70,6 +70,10 @@ test('authenticated expense CRUD, validation, and owner isolation', async () => 
     assert.equal(list.json().total, 1);
     assert.equal(list.json().expenses[0].id, id);
 
+    const literalWildcard = await call('ExpenseService/ListExpenses', { query: '%' }, cookie);
+    assert.equal(literalWildcard.statusCode, 200);
+    assert.equal(literalWildcard.json().total ?? 0, 0);
+
     const update = await call('ExpenseService/UpdateExpense', { id, input: {
       amountMinor: '5678', currency: 'CURRENCY_USD', occurredAt: '2026-01-02T12:00:00Z',
       description: 'Dinner', categoryId,
