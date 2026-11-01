@@ -5,6 +5,12 @@ import type { Database } from './db.js';
 
 const cookieName = 'extra_session';
 const sessionSeconds = 60 * 60 * 24 * 7;
+// Generated with the same Argon2 defaults as real user passwords.
+const unknownUserHash = '$argon2id$v=19$m=65536,p=4,t=3$oVci30NNiZXLjfrcsNp5xg$EX2PegB1VpbESBMkKMUBdx4aWyOFGXsFf4mzxVuy/JI';
+
+export function hasSessionCookie(cookie: string | undefined): boolean {
+  return /(?:^|;\s*)extra_session=/.test(cookie ?? '');
+}
 
 export function tokenHash(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -48,7 +54,8 @@ export async function login(db: Database, email: string, password: string): Prom
     'SELECT id, email, password_hash FROM users WHERE email = $1', [normalized],
   );
   const user = result.rows[0];
-  if (!user || !(await argon2.verify(user.password_hash, password))) {
+  const validPassword = await argon2.verify(user?.password_hash ?? unknownUserHash, password);
+  if (!user || !validPassword) {
     throw new ConnectError('Invalid email or password', Code.Unauthenticated);
   }
   const token = await createSession(db, user.id);

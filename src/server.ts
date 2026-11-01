@@ -3,6 +3,7 @@ import rateLimit from '@fastify/rate-limit';
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify';
 import fastify from 'fastify';
 import type { Pool } from 'pg';
+import { hasSessionCookie } from './auth.js';
 import { createRoutes } from './routes.js';
 
 export async function buildServer(pool: Pool, frontendOrigin: string, production: boolean) {
@@ -17,10 +18,13 @@ export async function buildServer(pool: Pool, frontendOrigin: string, production
   await server.register(rateLimit, { global: false });
   const checkLoginRate = server.createRateLimit({ max: 5, timeWindow: '1 minute' });
   server.addHook('onRequest', async (request, reply) => {
-    if (request.url === '/extra.v1.AuthService/Login') {
+    if (request.method === 'POST' && hasSessionCookie(request.headers.cookie) && request.headers.origin !== frontendOrigin) {
+      return reply.code(403).send({ code: 'permission_denied', message: 'Untrusted origin' });
+    }
+    if (request.method === 'POST' && request.url.split('?', 1)[0] === '/extra.v1.AuthService/Login') {
       const limit = await checkLoginRate(request);
       if (!limit.isAllowed && limit.isExceeded) {
-        reply.header('Retry-After', String(limit.ttlInSeconds)).code(429).send({ code: 'resource_exhausted', message: 'Too many login attempts' });
+        return reply.header('Retry-After', String(limit.ttlInSeconds)).code(429).send({ code: 'resource_exhausted', message: 'Too many login attempts' });
       }
     }
   });

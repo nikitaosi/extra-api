@@ -32,6 +32,10 @@ curl -i -H 'Content-Type: application/json' -d '{}' http://localhost:3101/extra.
 
 All expense methods require a session established with `AuthService/Login`. Session tokens are stored only in an HttpOnly cookie; their hashes are stored in PostgreSQL. The login endpoint is rate limited. The API never exposes a shared bearer token to the browser.
 
+The production frontend sends same-origin requests to `/api/*`, which Netlify rewrites to this API. For POST requests carrying the session cookie, the API requires an `Origin` exactly matching `FRONTEND_ORIGIN`; absent, `null`, or other origins receive HTTP 403. The cookie remains `SameSite=Lax` and is `Secure` in production. A script replaying a session cookie must also send the configured `Origin` header. This check limits browser cross-site request forgery, but it is not authentication and does not stop scripts that can set headers or JavaScript running on the trusted frontend origin.
+
+Login permits five attempts per minute per Fastify client IP, including requests with query parameters. The limiter uses in-memory state, so it is not shared between multiple server instances; behind a proxy, multiple users may also share a reported IP. Unknown emails still perform an Argon2 verification against a dummy hash to reduce account enumeration by response time, although database and network variation cannot be made identical.
+
 Expense amounts use integer minor units. New records support THB and USD; the earlier GEL enum and database values remain accepted so existing records can still be read and updated. Currency support is defined in the Protobuf contract and enforced by the API and database migration together.
 
 ## Checks
